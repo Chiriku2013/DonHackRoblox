@@ -15,64 +15,34 @@ local function loadDon()
     return ""
 end
 
--- Làm mờ tên nếu dài
+-- Làm mờ tên nếu dài hơn 6 ký tự
 local function obfuscateName(name)
     if #name <= 6 then
         return name
+    else
+        local visible = string.sub(name, 1, 6)
+        local hidden = string.rep("*", #name - 6)
+        return visible .. hidden
     end
-    return string.sub(name, 1, 4) .. string.rep("*", 6)
 end
 
--- Hiển thị trên đầu
-local function updateBillboard(donText)
-    local char = player.Character or player.CharacterAdded:Wait()
-    local head = char:WaitForChild("Head")
-    if head:FindFirstChild("PlayerInfoDisplay") then
-        head.PlayerInfoDisplay:Destroy()
-    end
-
-    local gui = Instance.new("BillboardGui", head)
-    gui.Name = "PlayerInfoDisplay"
-    gui.Adornee = head
-    gui.Size = UDim2.new(0, 250, 0, 60)
-    gui.StudsOffset = Vector3.new(0, 2.5, 0)
-    gui.AlwaysOnTop = true
-
-    local nameLabel = Instance.new("TextLabel", gui)
-    nameLabel.Size = UDim2.new(1, 0, 0.5, 0)
-    nameLabel.BackgroundTransparency = 1
-    nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    nameLabel.TextStrokeTransparency = 0.5
-    nameLabel.Text = "👤Tên: " .. obfuscateName(player.Name)
-    nameLabel.Font = Enum.Font.GothamBold
-    nameLabel.TextSize = 14
-
-    local donLabel = Instance.new("TextLabel", gui)
-    donLabel.Position = UDim2.new(0, 0, 0.5, 0)
-    donLabel.Size = UDim2.new(1, 0, 0.5, 0)
-    donLabel.BackgroundTransparency = 1
-    donLabel.TextColor3 = Color3.fromRGB(255, 120, 120)
-    donLabel.TextStrokeTransparency = 0.5
-    donLabel.Text = "📌Đơn: " .. donText
-    donLabel.Font = Enum.Font.GothamBold
-    donLabel.TextSize = 14
-end
-
--- UI cố định trên màn hình
+-- UI
 local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 gui.ResetOnSpawn = false
-gui.Name = "DonInfoUI"
+gui.Name = "DonTenUI"
 
 local frame = Instance.new("Frame", gui)
-frame.Position = UDim2.new(0, 20, 0, 20)
-frame.Size = UDim2.new(0, 280, 0, 90)
-frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.AnchorPoint = Vector2.new(0.5, 0)
+frame.Position = UDim2.new(0.5, 0, 0, 10)
+frame.Size = UDim2.new(0, 300, 0, 80)
+frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 frame.BorderSizePixel = 0
-frame.Name = "InfoFrame"
+frame.Name = "MainFrame"
 
+-- Label tên
 local nameLabel = Instance.new("TextLabel", frame)
-nameLabel.Position = UDim2.new(0, 10, 0, 10)
-nameLabel.Size = UDim2.new(1, -20, 0, 25)
+nameLabel.Position = UDim2.new(0, 10, 0, 5)
+nameLabel.Size = UDim2.new(1, -20, 0, 30)
 nameLabel.BackgroundTransparency = 1
 nameLabel.TextColor3 = Color3.new(1, 1, 1)
 nameLabel.Text = "👤Tên: " .. obfuscateName(player.Name)
@@ -80,26 +50,22 @@ nameLabel.Font = Enum.Font.GothamBold
 nameLabel.TextSize = 16
 nameLabel.TextXAlignment = Enum.TextXAlignment.Left
 
+-- Đơn
 local donBox = Instance.new("TextBox", frame)
-donBox.Position = UDim2.new(0, 10, 0, 45)
+donBox.Position = UDim2.new(0, 10, 0, 40)
 donBox.Size = UDim2.new(1, -20, 0, 30)
 donBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 donBox.TextColor3 = Color3.new(1,1,1)
 donBox.Font = Enum.Font.Gotham
-donBox.TextSize = 14
+donBox.TextSize = 15
 donBox.TextXAlignment = Enum.TextXAlignment.Left
+donBox.PlaceholderText = "📌Đơn: Nhập đơn và nhấn Enter"
 donBox.Text = loadDon()
-donBox.PlaceholderText = "📌Đơn: Nhập đơn của bạn..."
+donBox.ClearTextOnFocus = false
 
--- Cập nhật khi Enter
+-- Lưu khi Enter
 donBox.FocusLost:Connect(function(enterPressed)
     if enterPressed then
         saveDon(donBox.Text)
-        updateBillboard(donBox.Text)
     end
 end)
-
--- Tự cập nhật nếu đã có sẵn đơn
-if donBox.Text ~= "" then
-    updateBillboard(donBox.Text)
-end
