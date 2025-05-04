@@ -1,16 +1,15 @@
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
-local HttpService = game:GetService("HttpService")
 
--- Hàm lưu và đọc đơn
+-- Lưu và đọc đơn
 local function saveDon(text)
-    if isfile and writefile then
+    if writefile then
         writefile("don_saved.txt", text)
     end
 end
 
 local function loadDon()
-    if isfile and readfile and isfile("don_saved.txt") then
+    if readfile and isfile("don_saved.txt") then
         return readfile("don_saved.txt")
     end
     return ""
@@ -24,13 +23,12 @@ local function obfuscateName(name)
     return string.sub(name, 1, 4) .. string.rep("*", 6)
 end
 
--- Tạo Billboard GUI trên đầu
-local function createBillboard(nameText, donText)
-    local character = player.Character or player.CharacterAdded:Wait()
-    local head = character:WaitForChild("Head")
-
+-- Hiển thị trên đầu
+local function updateBillboard(donText)
+    local char = player.Character or player.CharacterAdded:Wait()
+    local head = char:WaitForChild("Head")
     if head:FindFirstChild("PlayerInfoDisplay") then
-        head:FindFirstChild("PlayerInfoDisplay"):Destroy()
+        head.PlayerInfoDisplay:Destroy()
     end
 
     local gui = Instance.new("BillboardGui", head)
@@ -45,7 +43,7 @@ local function createBillboard(nameText, donText)
     nameLabel.BackgroundTransparency = 1
     nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     nameLabel.TextStrokeTransparency = 0.5
-    nameLabel.Text = "👤Tên: " .. obfuscateName(nameText)
+    nameLabel.Text = "👤Tên: " .. obfuscateName(player.Name)
     nameLabel.Font = Enum.Font.GothamBold
     nameLabel.TextSize = 14
 
@@ -60,36 +58,48 @@ local function createBillboard(nameText, donText)
     donLabel.TextSize = 14
 end
 
--- UI nhập đơn
-local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-screenGui.ResetOnSpawn = false
+-- UI cố định trên màn hình
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+gui.ResetOnSpawn = false
+gui.Name = "DonInfoUI"
 
-local frame = Instance.new("Frame", screenGui)
-frame.Size = UDim2.new(0, 250, 0, 80)
-frame.Position = UDim2.new(0.5, -125, 0.1, 0)
-frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+local frame = Instance.new("Frame", gui)
+frame.Position = UDim2.new(0, 20, 0, 20)
+frame.Size = UDim2.new(0, 280, 0, 90)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 frame.BorderSizePixel = 0
-frame.Name = "DonUI"
+frame.Name = "InfoFrame"
+
+local nameLabel = Instance.new("TextLabel", frame)
+nameLabel.Position = UDim2.new(0, 10, 0, 10)
+nameLabel.Size = UDim2.new(1, -20, 0, 25)
+nameLabel.BackgroundTransparency = 1
+nameLabel.TextColor3 = Color3.new(1, 1, 1)
+nameLabel.Text = "👤Tên: " .. obfuscateName(player.Name)
+nameLabel.Font = Enum.Font.GothamBold
+nameLabel.TextSize = 16
+nameLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 local donBox = Instance.new("TextBox", frame)
-donBox.PlaceholderText = "Nhập đơn và nhấn Enter"
-donBox.Size = UDim2.new(1, -20, 0, 50)
-donBox.Position = UDim2.new(0, 10, 0, 15)
-donBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+donBox.Position = UDim2.new(0, 10, 0, 45)
+donBox.Size = UDim2.new(1, -20, 0, 30)
+donBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 donBox.TextColor3 = Color3.new(1,1,1)
 donBox.Font = Enum.Font.Gotham
 donBox.TextSize = 14
+donBox.TextXAlignment = Enum.TextXAlignment.Left
 donBox.Text = loadDon()
+donBox.PlaceholderText = "📌Đơn: Nhập đơn của bạn..."
 
--- Khi nhấn Enter để lưu đơn và hiện lên đầu
+-- Cập nhật khi Enter
 donBox.FocusLost:Connect(function(enterPressed)
     if enterPressed then
         saveDon(donBox.Text)
-        createBillboard(player.Name, donBox.Text)
+        updateBillboard(donBox.Text)
     end
 end)
 
--- Tự hiện khi đã có đơn trước đó
+-- Tự cập nhật nếu đã có sẵn đơn
 if donBox.Text ~= "" then
-    createBillboard(player.Name, donBox.Text)
+    updateBillboard(donBox.Text)
 end
