@@ -26,9 +26,10 @@ local frame = Instance.new("Frame", gui)
 frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 frame.BackgroundTransparency = 0.25
 frame.BorderSizePixel = 0
-frame.Position = UDim2.new(0.5, 0, 0, 10) -- chính giữa trên cùng
+frame.Position = UDim2.new(0.5, 0, 0, 10)
 frame.AnchorPoint = Vector2.new(0.5, 0)
 frame.Name = "MainFrame"
+frame.Size = UDim2.new(0, 300, 0, 70)
 
 -- 👤Tên
 local nameLabel = Instance.new("TextLabel", frame)
@@ -38,6 +39,9 @@ nameLabel.Font = Enum.Font.GothamBold
 nameLabel.TextSize = 16
 nameLabel.TextXAlignment = Enum.TextXAlignment.Center
 nameLabel.Text = "👤Tên: " .. obfuscateName(player.Name)
+nameLabel.Size = UDim2.new(1, -40, 0, 25)
+nameLabel.Position = UDim2.new(0.5, 0, 0, 5)
+nameLabel.AnchorPoint = Vector2.new(0.5, 0)
 
 -- ✏️ Nút đổi đơn
 local editBtn = Instance.new("TextButton", frame)
@@ -47,6 +51,7 @@ editBtn.TextSize = 14
 editBtn.BackgroundTransparency = 1
 editBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 editBtn.Size = UDim2.new(0, 20, 0, 20)
+editBtn.Position = UDim2.new(1, -25, 0, 5)
 
 -- 📌Đơn - TextBox
 local donBox = Instance.new("TextBox", frame)
@@ -54,39 +59,27 @@ donBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 donBox.TextColor3 = Color3.new(1,1,1)
 donBox.Font = Enum.Font.GothamBold
 donBox.TextSize = 15
-donBox.TextXAlignment = Enum.TextXAlignment.Left
+donBox.TextXAlignment = Enum.TextXAlignment.Center
 donBox.ClearTextOnFocus = false
 donBox.Text = loadDon()
 donBox.PlaceholderText = "Nhập đơn rồi nhấn Enter"
+donBox.Size = UDim2.new(1, -40, 0, 25)
+donBox.Position = UDim2.new(0.5, 0, 0, 38)
+donBox.AnchorPoint = Vector2.new(0.5, 0)
 
 -- 📌Đơn - Label
 local donLabel = Instance.new("TextLabel", frame)
 donLabel.BackgroundTransparency = 1
-donLabel.TextColor3 = Color3.fromRGB(255, 255, 0) -- Vàng
+donLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
 donLabel.Font = Enum.Font.GothamBold
 donLabel.TextSize = 15
-donLabel.TextXAlignment = Enum.TextXAlignment.Left
+donLabel.TextXAlignment = Enum.TextXAlignment.Center
 donLabel.Visible = false
+donLabel.Size = donBox.Size
+donLabel.Position = donBox.Position
+donLabel.AnchorPoint = Vector2.new(0.5, 0)
 
--- Cập nhật UI
-local function updateUI()
-    nameLabel.Size = UDim2.new(0, nameLabel.TextBounds.X + 30, 0, 25)
-    nameLabel.Position = UDim2.new(0.5, -nameLabel.Size.X.Offset/2, 0, 5)
-
-    editBtn.Position = UDim2.new(0, frame.Size.X.Offset - 25, 0, 5)
-
-    local donText = donBox.Visible and donBox.Text or donLabel.Text
-    local donWidth = math.max(120, donBox.TextBounds.X + 30)
-    donBox.Size = UDim2.new(0, donWidth, 0, 25)
-    donLabel.Size = donBox.Size
-
-    donBox.Position = UDim2.new(0, 10, 0, 35)
-    donLabel.Position = donBox.Position
-
-    local frameWidth = math.max(nameLabel.TextBounds.X + 60, donWidth + 30)
-    frame.Size = UDim2.new(0, frameWidth, 0, 70)
-end
-
+-- Sự kiện
 donBox.FocusLost:Connect(function(enter)
     if enter then
         local text = donBox.Text
@@ -94,7 +87,6 @@ donBox.FocusLost:Connect(function(enter)
         donLabel.Text = "📌Đơn: " .. text
         donLabel.Visible = true
         donBox.Visible = false
-        updateUI()
     end
 end)
 
@@ -103,13 +95,11 @@ editBtn.MouseButton1Click:Connect(function()
     donBox.Visible = true
     donLabel.Visible = false
     donBox:CaptureFocus()
-    updateUI()
 end)
 
+-- Hiện đơn đã lưu nếu có
 if donBox.Text ~= "" then
     donLabel.Text = "📌Đơn: " .. donBox.Text
     donLabel.Visible = true
     donBox.Visible = false
 end
-
-updateUI()
